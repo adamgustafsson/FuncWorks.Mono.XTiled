@@ -306,14 +306,14 @@ namespace FuncWorks.XNA.XTiled
 
                         spriteBatch.Draw(
                             this.Tilesets[this.SourceTiles[this.TileLayers[layerID].Tiles[intX][intY].SourceID].TilesetID].Texture,
-                            new Vector2(tileTarget.X, tileTarget.Y),     
-                            this.SourceTiles[this.TileLayers[layerID].Tiles[intX][intY].SourceID].Source,            
-                            this.TileLayers[layerID].OpacityColor, 
+                            new Vector2(tileTarget.X, tileTarget.Y),
+                            this.SourceTiles[this.TileLayers[layerID].Tiles[intX][intY].SourceID].Source,
+                            this.TileLayers[layerID].OpacityColor,
                             this.TileLayers[layerID].Tiles[intX][intY].Rotation,
                             this.SourceTiles[this.TileLayers[layerID].Tiles[intX][intY].SourceID].Origin,
-                            1,               
-                            this.TileLayers[layerID].Tiles[intX][intY].Effects,   
-                            layerDepth);                 
+                            1,
+                            this.TileLayers[layerID].Tiles[intX][intY].Effects,
+                            layerDepth);
                     }
                 }
             }
@@ -593,6 +593,11 @@ namespace FuncWorks.XNA.XTiled
         {
             List<MapObject> results = new List<MapObject>();
 
+            if (objectLayerID < 0)
+            {
+                return results;
+            }
+
             for (int i = 0; i < this.ObjectLayers[objectLayerID].MapObjects.Length; i++)
             {
                 if (region.Contains(this.ObjectLayers[objectLayerID].MapObjects[i].Bounds) || region.Intersects(this.ObjectLayers[objectLayerID].MapObjects[i].Bounds))
@@ -622,6 +627,11 @@ namespace FuncWorks.XNA.XTiled
         public IEnumerable<MapObject> GetObjectsInRegion(Int32 objectLayerID, ref System.Drawing.RectangleF region)
         {
             List<MapObject> results = new List<MapObject>();
+
+            if (objectLayerID < 0)
+            {
+                return results;
+            }
 
             for (int i = 0; i < this.ObjectLayers[objectLayerID].MapObjects.Length; i++)
             {
