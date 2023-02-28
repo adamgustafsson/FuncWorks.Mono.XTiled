@@ -103,7 +103,7 @@ namespace FuncWorks.XNA.XTiled {
             for (int i = 0; i < Lines.Length; i++)
                 Line.Draw(spriteBatch, Lines[i], region, texture, lineWidth, color, layerDepth);
 
-            spriteBatch.Draw(this.Texture, Map.Translate(this.Bounds, region), null, fillColor, 0, Vector2.Zero, SpriteEffects.None, layerDepth);
+            spriteBatch.Draw(texture, Map.Translate(this.Bounds, region), null, fillColor, 0, Vector2.Zero, SpriteEffects.None, layerDepth);
         }
 
         /// <summary>
