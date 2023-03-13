@@ -243,6 +243,10 @@ namespace FuncWorks.XNA.XTiled
                 txMax = txMax * 2 + 1;
             }
 
+            // In order to remove tile-flickering at edges we expand the maxvalues with one extra tile.
+            tyMax += this.TileHeight;
+            txMax += this.TileWidth;
+
             DrawLayer(spriteBatch, layerID, ref region, txMin, txMax, tyMin, tyMax, layerDepth);
         }
 
