@@ -244,8 +244,8 @@ namespace FuncWorks.XNA.XTiled
             }
 
             // In order to remove tile-flickering at edges we expand the maxvalues with one extra tile.
-            tyMax += this.TileHeight;
-            txMax += this.TileWidth;
+            tyMax += 1;
+            txMax += 1;
 
             DrawLayer(spriteBatch, layerID, ref region, txMin, txMax, tyMin, tyMax, layerDepth);
         }
