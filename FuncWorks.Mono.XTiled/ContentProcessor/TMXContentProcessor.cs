@@ -413,10 +413,10 @@ namespace FuncWorks.XNA.XTiled
                     MapObject o = new MapObject();
                     o.Name = oElem.Attribute("name") == null ? null : oElem.Attribute("name").Value;
                     o.Type = oElem.Attribute("type") == null ? null : oElem.Attribute("type").Value;
-                    o.Bounds.X = oElem.Attribute("x") == null ? 0 : Convert.ToInt32(oElem.Attribute("x").Value);
-                    o.Bounds.Y = oElem.Attribute("y") == null ? 0 : Convert.ToInt32(oElem.Attribute("y").Value);
-                    o.Bounds.Width = oElem.Attribute("width") == null ? 0 : Convert.ToInt32(oElem.Attribute("width").Value);
-                    o.Bounds.Height = oElem.Attribute("height") == null ? 0 : Convert.ToInt32(oElem.Attribute("height").Value);
+                    o.Bounds.X = oElem.Attribute("x") == null ? 0 : (int)Convert.ToDouble(oElem.Attribute("x").Value);
+                    o.Bounds.Y = oElem.Attribute("y") == null ? 0 : (int)Convert.ToDouble(oElem.Attribute("y").Value);
+                    o.Bounds.Width = oElem.Attribute("width") == null ? 0 : (int)Convert.ToDouble(oElem.Attribute("width").Value);
+                    o.Bounds.Height = oElem.Attribute("height") == null ? 0 : (int)Convert.ToDouble(oElem.Attribute("height").Value);
                     o.TileID = oElem.Attribute("gid") == null ? null : (Int32?)gid2id[Convert.ToUInt32(oElem.Attribute("gid").Value)];
                     o.Visible = oElem.Attribute("visible") == null ? true : oElem.Attribute("visible").Equals("1");
 
