@@ -9,6 +9,10 @@ namespace FuncWorks.XNA.XTiled {
     /// </summary>
     public class MapObject {
         /// <summary>
+        /// Object ID
+        /// </summary>
+        public Int32? Id;
+        /// <summary>
         /// Optional name of the object
         /// </summary>
         public String Name;

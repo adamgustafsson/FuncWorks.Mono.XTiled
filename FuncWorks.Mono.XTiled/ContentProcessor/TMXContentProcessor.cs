@@ -40,7 +40,19 @@ namespace FuncWorks.XNA.XTiled
             return Process(doc, content);
         }
 
-        private static Map Process(XDocument input, ContentManager content)
+        public static Map LoadRawTMX(string tmxPath)
+        {
+            var fileName = tmxPath.Contains("/") ? tmxPath.Split("/").Last() : tmxPath;
+
+            var doc = XDocument.Load(tmxPath);
+            doc.Document.Root.Add(new XElement("File",
+                new XAttribute("name", Path.GetFileName(fileName)),
+                new XAttribute("path", Path.GetDirectoryName(fileName))));
+
+            return Process(doc);
+        }
+
+        private static Map Process(XDocument input, ContentManager content = null)
         {
             CultureInfo culture = Thread.CurrentThread.CurrentCulture;
             Thread.CurrentThread.CurrentCulture = CultureInfo.InvariantCulture;
@@ -51,7 +63,6 @@ namespace FuncWorks.XNA.XTiled
             Dictionary<UInt32, Int32> gid2id = new Dictionary<UInt32, Int32>();
             gid2id.Add(0, -1);
 
-            String mapDirectory = _tmxResourcesFullPath;
             var old = input.Document.Root.Element("File").Attribute("path").Value;
             Decimal Version = Convert.ToDecimal(input.Document.Root.Attribute("version").Value);
 
@@ -86,11 +97,11 @@ namespace FuncWorks.XNA.XTiled
                 Tileset t = new Tileset();
                 XElement tElem = elem;
                 UInt32 FirstGID = Convert.ToUInt32(tElem.Attribute("firstgid").Value);
-                string fileRoot = mapDirectory;
+                string fileRoot = _tmxResourcesFullPath;
 
-                if (elem.Attribute("source") != null)
+                if (content != null && elem.Attribute("source") != null)
                 {
-                    fileRoot = Path.Combine(mapDirectory, elem.Attribute("source").Value);
+                    fileRoot = Path.Combine(_tmxResourcesFullPath, elem.Attribute("source").Value);
                     XDocument tsx = XDocument.Load(fileRoot);
                     fileRoot = Path.GetDirectoryName(fileRoot);
                     tElem = tsx.Root;
@@ -118,7 +129,33 @@ namespace FuncWorks.XNA.XTiled
                     XElement imgElem = tElem.Element("image");
                     var imageSource = imgElem.Attribute("source").Value;
                     imageSource = imageSource.Contains("/") ? imageSource.Split("/").ToList().Last() : imageSource;
-                    t.ImageFileName = Path.Combine(fileRoot, imageSource);
+                    
+                    if (content != null)
+                    {
+                        t.ImageFileName = Path.Combine(fileRoot, imageSource);
+                        var extension = Path.GetExtension(t.ImageFileName);
+                        var fileName = t.ImageFileName.Replace(extension, "").Replace("Content/", "").Replace("Content\\", "");
+
+                        if (t.ImageWidth == -1 || t.ImageHeight == -1)
+                        {
+                            try
+                            {
+                                FileStream fileStream = new FileStream(t.ImageFileName, FileMode.Open);
+                                Texture2D img = content.Load<Texture2D>(fileName);
+                                fileStream.Dispose();
+                                t.ImageHeight = img.Height;
+                                t.ImageWidth = img.Width;
+                            }
+                            catch (Exception ex)
+                            {
+                                throw new Exception(String.Format("Image size not set for {0} and error loading file.", t.ImageFileName), ex);
+                            }
+                        }
+
+                        t.Texture = content.Load<Texture2D>(fileName);
+                    }
+
+
                     t.ImageWidth = imgElem.Attribute("width") == null ? -1 : Convert.ToInt32(imgElem.Attribute("width").Value);
                     t.ImageHeight = imgElem.Attribute("height") == null ? -1 : Convert.ToInt32(imgElem.Attribute("height").Value);
                     t.ImageTransparentColor = null;
@@ -126,27 +163,6 @@ namespace FuncWorks.XNA.XTiled
                     {
                         t.ImageTransparentColor = HexColorToRGBColor("#" + imgElem.Attribute("trans").Value.TrimStart('#'));
                     }
-
-                    var extension = Path.GetExtension(t.ImageFileName);
-                    var fileName = t.ImageFileName.Replace(extension, "").Replace("Content/", "").Replace("Content\\", "");
-
-                    if (t.ImageWidth == -1 || t.ImageHeight == -1)
-                    {
-                        try
-                        {
-                            FileStream fileStream = new FileStream(t.ImageFileName, FileMode.Open);
-                            Texture2D img = content.Load<Texture2D>(fileName);
-                            fileStream.Dispose();
-                            t.ImageHeight = img.Height;
-                            t.ImageWidth = img.Width;
-                        }
-                        catch (Exception ex)
-                        {
-                            throw new Exception(String.Format("Image size not set for {0} and error loading file.", t.ImageFileName), ex);
-                        }
-                    }
-
-                    t.Texture = content.Load<Texture2D>(fileName);
                 }
 
                 UInt32 gid = FirstGID;
@@ -411,6 +427,7 @@ namespace FuncWorks.XNA.XTiled
                 foreach (var oElem in olElem.Elements("object"))
                 {
                     MapObject o = new MapObject();
+                    o.Id = oElem.Attribute("id") == null ? null : (int)Convert.ToInt32(oElem.Attribute("id").Value);
                     o.Name = oElem.Attribute("name") == null ? null : oElem.Attribute("name").Value;
                     o.Type = oElem.Attribute("type") == null ? null : oElem.Attribute("type").Value;
                     o.Bounds.X = oElem.Attribute("x") == null ? 0 : (int)Convert.ToDouble(oElem.Attribute("x").Value);
