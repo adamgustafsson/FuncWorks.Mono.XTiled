@@ -57,6 +57,12 @@ namespace FuncWorks.XNA.XTiled {
             spriteBatch.Draw(texture, start, null, color, line.Angle, Vector2.Zero, new Vector2(line.Length, lineWidth), SpriteEffects.None, layerDepth);
         }
 
+        public static void Draw(SpriteBatch spriteBatch, Line line, System.Drawing.RectangleF region, Texture2D texture, Single lineWidth, Color color, Single layerDepth)
+        {
+            Vector2 start = Map.Translate(line.Start, region);
+            spriteBatch.Draw(texture, start, null, color, line.Angle, Vector2.Zero, new Vector2(line.Length, lineWidth), SpriteEffects.None, layerDepth);
+        }
+
         /// <summary>
         /// Determines if a specificed Line intersects with this Line
         /// </summary>

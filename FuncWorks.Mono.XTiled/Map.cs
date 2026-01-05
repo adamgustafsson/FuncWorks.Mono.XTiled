@@ -3,6 +3,7 @@ using System.Linq;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using System.Collections.Generic;
+using RectangleF = System.Drawing.RectangleF;
 
 namespace FuncWorks.XNA.XTiled
 {
@@ -202,7 +203,7 @@ namespace FuncWorks.XNA.XTiled
             DrawLayer(spriteBatch, layerID, ref region, layerDepth);
         }
 
-        public void DrawLayer(SpriteBatch spriteBatch, Int32 layerID, System.Drawing.RectangleF region, Single layerDepth)
+        public void DrawLayer(SpriteBatch spriteBatch, Int32 layerID, RectangleF region, Single layerDepth)
         {
             DrawLayer(spriteBatch, layerID, ref region, layerDepth);
         }
@@ -230,7 +231,7 @@ namespace FuncWorks.XNA.XTiled
             DrawLayer(spriteBatch, layerID, ref region, txMin, txMax, tyMin, tyMax, layerDepth);
         }
 
-        public void DrawLayer(SpriteBatch spriteBatch, Int32 layerID, ref System.Drawing.RectangleF region, Single layerDepth)
+        public void DrawLayer(SpriteBatch spriteBatch, Int32 layerID, ref RectangleF region, Single layerDepth)
         {
             float txMin = region.X / this.TileWidth;
             float txMax = (region.X + region.Width) / this.TileWidth;
@@ -284,7 +285,7 @@ namespace FuncWorks.XNA.XTiled
             }
         }
 
-        private void DrawLayer(SpriteBatch spriteBatch, Int32 layerID, ref System.Drawing.RectangleF region, float txMin, float txMax, float tyMin, float tyMax, float layerDepth)
+        private void DrawLayer(SpriteBatch spriteBatch, Int32 layerID, ref RectangleF region, float txMin, float txMax, float tyMin, float tyMax, float layerDepth)
         {
             for (float y = tyMin; y <= tyMax; y++)
             {
@@ -297,7 +298,7 @@ namespace FuncWorks.XNA.XTiled
                     if (x < this.TileLayers[layerID].Tiles.Length && y < this.TileLayers[layerID].Tiles[intX].Length && this.TileLayers[layerID].Tiles[intX][intY] != null)
                     {
                         var targetBounds = this.TileLayers[layerID].Tiles[intX][intY].Target;
-                        System.Drawing.RectangleF tileTarget = new System.Drawing.RectangleF(targetBounds.X, targetBounds.Y, targetBounds.Width, targetBounds.Height);
+                        RectangleF tileTarget = new RectangleF(targetBounds.X, targetBounds.Y, targetBounds.Width, targetBounds.Height);
                         tileTarget.X = tileTarget.X - region.X;
                         tileTarget.Y = tileTarget.Y - region.Y;
 
@@ -456,6 +457,14 @@ namespace FuncWorks.XNA.XTiled
         }
 
         /// <summary>
+        /// Method to draw a RectangleF
+        /// </summary>
+        public static void DrawRectangleF(SpriteBatch spriteBatch, RectangleF rect, RectangleF region, Single layerDepth, Color linecolor, Color fillColor)
+        {
+            DrawRectangleF(spriteBatch, ref rect, ref region, layerDepth, ref linecolor, ref fillColor);
+        }
+
+        /// <summary>
         /// Method to draw a Rectangle
         /// </summary>
         /// <param name="spriteBatch">XNA SpriteBatch instance; SpriteBatch.Begin() must be called before using this method</param>
@@ -473,6 +482,22 @@ namespace FuncWorks.XNA.XTiled
 
             Rectangle target = Map.Translate(rect, region);
             spriteBatch.Draw(Map._whiteTexture, target, null, fillColor, 0, Vector2.Zero, SpriteEffects.None, layerDepth);
+            Line.Draw(spriteBatch, Line.FromPoints(new Vector2(rect.Right, rect.Top), new Vector2(rect.Left, rect.Top)), region, Map._whiteTexture, Map._lineThickness, linecolor, layerDepth);
+            Line.Draw(spriteBatch, Line.FromPoints(new Vector2(rect.Left, rect.Top), new Vector2(rect.Left, rect.Bottom)), region, Map._whiteTexture, Map._lineThickness, linecolor, layerDepth);
+            Line.Draw(spriteBatch, Line.FromPoints(new Vector2(rect.Left, rect.Bottom), new Vector2(rect.Right, rect.Bottom)), region, Map._whiteTexture, Map._lineThickness, linecolor, layerDepth);
+            Line.Draw(spriteBatch, Line.FromPoints(new Vector2(rect.Right, rect.Bottom), new Vector2(rect.Right, rect.Top)), region, Map._whiteTexture, Map._lineThickness, linecolor, layerDepth);
+        }
+
+        public static void DrawRectangleF(SpriteBatch spriteBatch, ref RectangleF rect, ref RectangleF region, Single layerDepth, ref Color linecolor, ref Color fillColor)
+        {
+            if (Map._whiteTexture == null)
+            {
+                throw new Exception("Map.InitObjectDrawing must be called before Map is loaded to enable object rendering");
+            }
+
+            Rectangle target = Map.Translate(rect.RoundRecF(), region.RoundRecF());
+            spriteBatch.Draw(Map._whiteTexture, new Rectangle((int)target.X, (int)target.Y, (int)target.Width, (int)target.Height), null, fillColor, 0, Vector2.Zero, SpriteEffects.None, layerDepth);
+
             Line.Draw(spriteBatch, Line.FromPoints(new Vector2(rect.Right, rect.Top), new Vector2(rect.Left, rect.Top)), region, Map._whiteTexture, Map._lineThickness, linecolor, layerDepth);
             Line.Draw(spriteBatch, Line.FromPoints(new Vector2(rect.Left, rect.Top), new Vector2(rect.Left, rect.Bottom)), region, Map._whiteTexture, Map._lineThickness, linecolor, layerDepth);
             Line.Draw(spriteBatch, Line.FromPoints(new Vector2(rect.Left, rect.Bottom), new Vector2(rect.Right, rect.Bottom)), region, Map._whiteTexture, Map._lineThickness, linecolor, layerDepth);
@@ -534,6 +559,13 @@ namespace FuncWorks.XNA.XTiled
         /// <param name="relativeTo">Region of the map that is on screen</param>
         /// <returns>A location converted to screen space</returns>
         public static Vector2 Translate(Vector2 location, Rectangle relativeTo)
+        {
+            location.X = location.X - relativeTo.X;
+            location.Y = location.Y - relativeTo.Y;
+            return location;
+        }
+
+        public static Vector2 Translate(Vector2 location, RectangleF relativeTo)
         {
             location.X = location.X - relativeTo.X;
             location.Y = location.Y - relativeTo.Y;
@@ -617,7 +649,7 @@ namespace FuncWorks.XNA.XTiled
         /// <param name="objectLayerID">The object layer to check</param>
         /// <param name="region">The region, in pixles, to check</param>
         /// <returns>Collection of matching MapObjects</returns>
-        public IEnumerable<MapObject> GetObjectsInRegion(Int32 objectLayerID, System.Drawing.RectangleF region)
+        public IEnumerable<MapObject> GetObjectsInRegion(Int32 objectLayerID, RectangleF region)
         {
             return this.GetObjectsInRegion(objectLayerID, ref region);
         }
@@ -628,7 +660,7 @@ namespace FuncWorks.XNA.XTiled
         /// <param name="objectLayerID">The object layer to check</param>
         /// <param name="region">The region, in pixles, to check</param>
         /// <returns>Collection of matching MapObjects</returns>
-        public IEnumerable<MapObject> GetObjectsInRegion(Int32 objectLayerID, ref System.Drawing.RectangleF region)
+        public IEnumerable<MapObject> GetObjectsInRegion(Int32 objectLayerID, ref RectangleF region)
         {
             List<MapObject> results = new List<MapObject>();
 
@@ -742,21 +774,26 @@ namespace FuncWorks.XNA.XTiled
             return result;
         }
 
-        private System.Drawing.RectangleF RecToRecF(Rectangle rec)
+        private RectangleF RecToRecF(Rectangle rec)
         {
-            return new System.Drawing.RectangleF(rec.X, rec.Y, rec.Width, rec.Height);
+            return new RectangleF(rec.X, rec.Y, rec.Width, rec.Height);
         }
     }
 
     public static class RectangleFExtension
     {
-        public static bool Intersects(this System.Drawing.RectangleF r1, System.Drawing.RectangleF r2)
+        public static bool Intersects(this RectangleF r1, RectangleF r2)
         {
             return !(r2.Left > r1.Right
                      || r2.Right < r1.Left
                      || r2.Top > r1.Bottom
                      || r2.Bottom < r1.Top
                     );
+        }
+
+        public static Rectangle RoundRecF(this RectangleF rec)
+        {
+            return new Rectangle((int)rec.X, (int)rec.Y, (int)rec.Width, (int)rec.Height);
         }
     }
 }
