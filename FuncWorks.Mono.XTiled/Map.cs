@@ -253,9 +253,10 @@ namespace FuncWorks.XNA.XTiled
 
         private void DrawLayer(SpriteBatch spriteBatch, Int32 layerID, ref Rectangle region, Int32 txMin, Int32 txMax, Int32 tyMin, Int32 tyMax, Single layerDepth)
         {
-            for (int y = tyMin; y <= tyMax; y++)
+            // The loop body checks the far edges only; a region left of or above the map starts at tile 0.
+            for (int y = Math.Max(0, tyMin); y <= tyMax; y++)
             {
-                for (int x = txMin; x <= txMax; x++)
+                for (int x = Math.Max(0, txMin); x <= txMax; x++)
                 {
                     if (x < this.TileLayers[layerID].Tiles.Length && y < this.TileLayers[layerID].Tiles[x].Length && this.TileLayers[layerID].Tiles[x][y] != null)
                     {
@@ -287,9 +288,9 @@ namespace FuncWorks.XNA.XTiled
 
         private void DrawLayer(SpriteBatch spriteBatch, Int32 layerID, ref RectangleF region, float txMin, float txMax, float tyMin, float tyMax, float layerDepth)
         {
-            for (float y = tyMin; y <= tyMax; y++)
+            for (float y = Math.Max(0f, tyMin); y <= tyMax; y++)
             {
-                for (float x = txMin; x <= txMax; x++)
+                for (float x = Math.Max(0f, txMin); x <= txMax; x++)
                 {
 
                     var intX = (int)x;
@@ -749,11 +750,14 @@ namespace FuncWorks.XNA.XTiled
         public IEnumerable<TileData> GetTilesInRegion(Int32 tileLayerID, ref Rectangle region)
         {
             List<TileData> result = new List<TileData>();
+            var tiles = this.TileLayers[tileLayerID].Tiles;
 
-            Int32 txMin = region.X / this.TileWidth;
-            Int32 txMax = (region.X + region.Width) / this.TileWidth;
-            Int32 tyMin = region.Y / this.TileHeight;
-            Int32 tyMax = (region.Y + region.Height) / this.TileHeight;
+            // Same tile range as the all-layer overload: the region's far edge is exclusive, and the range is
+            // clamped to the layer, so a region reaching past the map returns the tiles inside it.
+            int txMin = Math.Max(0, GetTileCoord(region.X, TileWidth));
+            int txMax = GetTileCoord(region.X + region.Width - 1, TileWidth);
+            int tyMin = Math.Max(0, GetTileCoord(region.Y, TileHeight));
+            int tyMax = GetTileCoord(region.Y + region.Height - 1, TileHeight);
 
             if (this.Orientation == MapOrientation.Isometric)
             {
@@ -761,13 +765,15 @@ namespace FuncWorks.XNA.XTiled
                 txMax = txMax * 2 + 1;
             }
 
+            txMax = Math.Min(txMax, tiles.Length - 1);
+
             for (int y = tyMin; y <= tyMax; y++)
             {
                 for (int x = txMin; x <= txMax; x++)
                 {
-                    if (this.TileLayers[tileLayerID].Tiles[x][y] != null)
+                    if (y < tiles[x].Length && tiles[x][y] != null)
                     {
-                        result.Add(this.TileLayers[tileLayerID].Tiles[x][y]);
+                        result.Add(tiles[x][y]);
                     }
                 }
             }
