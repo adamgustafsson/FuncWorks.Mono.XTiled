@@ -18,6 +18,10 @@ namespace FuncWorks.XNA.XTiled
         /// </summary>
         public Dictionary<String, Property> Properties;
         /// <summary>
+        /// Class given to the tile in Tiled; null if none
+        /// </summary>
+        public String Class;
+        /// <summary>
         /// Area in the texture of the tileset that represents this tile
         /// </summary>
         public Rectangle Source;

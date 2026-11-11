@@ -20,6 +20,9 @@ namespace FuncWorks.XNA.XTiled
 
         private static string _tmxResourcesFullPath;
 
+        // Tiled writes an embedded tileset's image path relative to the TMX file, folders included.
+        private static string _tmxDirectory;
+
         /// <summary>
         /// 
         /// </summary>
@@ -31,6 +34,7 @@ namespace FuncWorks.XNA.XTiled
         {
             var fileName = tmxPath.Contains("/") ? tmxPath.Split("/").Last() : tmxPath;
             _tmxResourcesFullPath = "Content/" + tmxResourcesPath;
+            _tmxDirectory = Path.GetDirectoryName("Content/" + tmxPath);
 
             var doc = XDocument.Load("Content/" + tmxPath);
             doc.Document.Root.Add(new XElement("File",
@@ -97,7 +101,7 @@ namespace FuncWorks.XNA.XTiled
                 Tileset t = new Tileset();
                 XElement tElem = elem;
                 UInt32 FirstGID = Convert.ToUInt32(tElem.Attribute("firstgid").Value);
-                string fileRoot = _tmxResourcesFullPath;
+                string fileRoot = _tmxDirectory;
 
                 if (content != null && elem.Attribute("source") != null)
                 {
@@ -127,9 +131,9 @@ namespace FuncWorks.XNA.XTiled
                 if (tElem.Element("image") != null)
                 {
                     XElement imgElem = tElem.Element("image");
+                    // Relative to the file that declares the tileset, folders included, the way Tiled writes it.
                     var imageSource = imgElem.Attribute("source").Value;
-                    imageSource = imageSource.Contains("/") ? imageSource.Split("/").ToList().Last() : imageSource;
-                    
+
                     if (content != null)
                     {
                         t.ImageFileName = Path.Combine(fileRoot, imageSource);
@@ -226,6 +230,9 @@ namespace FuncWorks.XNA.XTiled
                             .ToArray();
                         tile.Terrain = new TerrainData(terrains[0], terrains[1], terrains[2], terrains[3]);
                     }
+
+                    // Tiled writes a tile's class as "type"; the 1.9 format wrote it as "class".
+                    tile.Class = (tileElem.Attribute("type") ?? tileElem.Attribute("class"))?.Value;
 
                     if (tileElem.Element("properties") != null)
                         foreach (var pElem in tileElem.Element("properties").Elements("property"))

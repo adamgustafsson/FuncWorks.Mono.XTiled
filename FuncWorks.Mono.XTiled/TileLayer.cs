@@ -31,5 +31,16 @@ namespace FuncWorks.XNA.XTiled {
         /// Collection of tiles on this layer
         /// </summary>
         public TileData[][] Tiles;
+
+        /// <summary>
+        /// Returns the tile at the given cell, or null if the cell is empty or outside the layer
+        /// </summary>
+        /// <param name="column">Column, in tiles</param>
+        /// <param name="row">Row, in tiles</param>
+        /// <returns>The TileData at the cell, or null</returns>
+        public TileData GetTile(Int32 column, Int32 row) {
+            Boolean isInLayer = column >= 0 && column < Tiles.Length && row >= 0 && row < Tiles[column].Length;
+            return isInLayer ? Tiles[column][row] : null;
+        }
     }
 }
